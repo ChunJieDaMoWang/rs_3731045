@@ -8,7 +8,7 @@ import albumentations as A
 from skimage import io
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
-from models.UPerNet import UPerNet
+from model.UPerNet import UPerNet
 from loss_functions.Combo import ComboLoss
 from torchmetrics import F1Score, Accuracy, CohenKappa
 from torchmetrics.segmentation import GeneralizedDiceScore, MeanIoU
