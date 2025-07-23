@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
-from loss_functions.SoftCrossEntropy import CrossEntropyLoss
-from loss_functions.SoftTversky import TverskyLoss
+from loss.SoftCrossEntropy import CrossEntropyLoss
+from loss.SoftTversky import TverskyLoss
 from typing import Optional, Union, Sequence
 
 
