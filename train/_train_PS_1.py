@@ -8,8 +8,7 @@ import albumentations as A
 from skimage import io
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
-from models.UPerNet import UPerNet
-from models.CNN.UNet_test import UNet
+from model.UPerNet import UPerNet
 from loss_functions.Combo import ComboLoss
 from torchmetrics import F1Score, CohenKappa, Accuracy
 from torchmetrics.segmentation import GeneralizedDiceScore, MeanIoU
@@ -124,9 +123,6 @@ class Config:
         self.ema_decay = args.setdefault('EMA Decay', None)
         self.ema_start_epoch = args.setdefault('EMA Start Epoch', 5)
 
-        # 新增使用UNet时的参数
-        self.first_dim = args.setdefault('UNet First Dim', 32 * 2)
-
 
 # --------------------
 # 增强数据集类
@@ -182,18 +178,18 @@ class SegmentationDataset(Dataset):
                 ], p=0.7),
 
                 # -------------------- 空间域增强 --------------------
-                # 弹性形变（轻微扰动水体边界）
-                A.ElasticTransform(
-                    alpha=1, sigma=50,
-                    p=0.3
-                ),
+                # # 弹性形变（轻微扰动水体边界）
+                # A.ElasticTransform(
+                #     alpha=1, sigma=50,
+                #     p=0.3
+                # ),
 
-                # 随机遮挡（模拟云/阴影）
-                A.CoarseDropout(
-                    num_holes_range=(1, 5), hole_height_range=(0.1, 0.2), hole_width_range=(0.1, 0.2),
-                    fill=0, fill_mask=0,
-                    p=0.4
-                ),
+                # # 随机遮挡（模拟云/阴影）
+                # A.CoarseDropout(
+                #     num_holes_range=(1, 5), hole_height_range=(0.1, 0.2), hole_width_range=(0.1, 0.2),
+                #     fill=0, fill_mask=0,
+                #     p=0.4
+                # ),
 
                 # -------------------- 标准化 --------------------
                 A.Normalize(
@@ -260,12 +256,9 @@ class SegmentationDataset(Dataset):
 # --------------------
 
 def create_model(config):
-    if config.model_name == 'UNet':
-        model = UNet(config.image_bands, config.num_classes, config.first_dim)
-    else:
-        model = UPerNet(
-            config.model_name, config.image_bands, config.decoder_channels, config.image_size[0], config.num_classes
-        )
+    model = UPerNet(
+        config.model_name, config.image_bands, config.decoder_channels, config.image_size[0], config.num_classes
+    )
 
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     non_trainable_params = sum(p.numel() for p in model.parameters() if not p.requires_grad)
@@ -678,7 +671,6 @@ if __name__ == "__main__":
         "Use AMP": False,
         'Grad Clip': 1.,
 
-        "Model Name": 'UNet',
         "Decoder Channels": 384,
 
         # 优化器相关
@@ -699,7 +691,6 @@ if __name__ == "__main__":
 
         # 'Resume Checkpoint': r'G:\_Model Weight\直接训练\Swin Transformer_checkpoint_epoch_75.pth',
 
-        'Unet First Dim': 32 * 2,
         "Device": 'cuda:1',
 
     }
